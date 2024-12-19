@@ -3,15 +3,22 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { supabase } from '@/integrations/supabase/client';
 
 const Index = () => {
   const [email, setEmail] = useState('');
   const navigate = useNavigate();
 
-  const handleDemoRequest = (e: React.FormEvent) => {
+  const handleDemoRequest = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle demo request logic here
-    console.log('Demo requested for:', email);
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (session) {
+      navigate('/dashboard');
+    } else {
+      console.log('Demo requested for:', email);
+      // Handle demo request logic here
+    }
   };
 
   return (

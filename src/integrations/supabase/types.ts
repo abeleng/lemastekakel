@@ -9,31 +9,64 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      geographic_distribution: {
+        Row: {
+          id: number
+          last_updated: string | null
+          misinformation_count: number | null
+          region: string
+        }
+        Insert: {
+          id?: number
+          last_updated?: string | null
+          misinformation_count?: number | null
+          region: string
+        }
+        Update: {
+          id?: number
+          last_updated?: string | null
+          misinformation_count?: number | null
+          region?: string
+        }
+        Relationships: []
+      }
       influencers: {
         Row: {
+          avg_comments: number | null
+          avg_likes: number | null
+          avg_shares: number | null
           created_at: string | null
           engagement_rate: number | null
           flagged_content_count: number | null
           follower_count: number | null
           id: number
+          location: string | null
           name: string
           platform: string | null
         }
         Insert: {
+          avg_comments?: number | null
+          avg_likes?: number | null
+          avg_shares?: number | null
           created_at?: string | null
           engagement_rate?: number | null
           flagged_content_count?: number | null
           follower_count?: number | null
           id?: number
+          location?: string | null
           name: string
           platform?: string | null
         }
         Update: {
+          avg_comments?: number | null
+          avg_likes?: number | null
+          avg_shares?: number | null
           created_at?: string | null
           engagement_rate?: number | null
           flagged_content_count?: number | null
           follower_count?: number | null
           id?: number
+          location?: string | null
           name?: string
           platform?: string | null
         }
@@ -73,6 +106,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      misinformation_trends: {
+        Row: {
+          frequency: number | null
+          id: number
+          sentiment: number | null
+          time_period: string | null
+          topic: string
+        }
+        Insert: {
+          frequency?: number | null
+          id?: number
+          sentiment?: number | null
+          time_period?: string | null
+          topic: string
+        }
+        Update: {
+          frequency?: number | null
+          id?: number
+          sentiment?: number | null
+          time_period?: string | null
+          topic?: string
+        }
+        Relationships: []
       }
       user_activity_logs: {
         Row: {
