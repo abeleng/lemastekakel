@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from '@/integrations/supabase/client';
+import { ChartBar, Globe, TrendingUp } from 'lucide-react';
 
 const Index = () => {
   const [email, setEmail] = useState('');
@@ -55,14 +56,14 @@ const Index = () => {
             <form onSubmit={handleDemoRequest} className="space-y-4">
               <Input
                 type="email"
-                placeholder="Enter your email"
+                placeholder="Enter your email for a demo"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="input-field"
                 required
               />
-              <Button type="submit" className="btn-primary w-full">
-                Request Demo
+              <Button type="submit" className="w-full">
+                Request Demo Access
               </Button>
             </form>
           </motion.div>
@@ -81,9 +82,9 @@ const Index = () => {
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: index * 0.1 }}
-                className="p-6 rounded-xl bg-gray-50 card-hover"
+                className="p-6 rounded-xl bg-gray-50 hover:shadow-md transition-shadow"
               >
-                <div className="text-accent mb-4">{feature.icon}</div>
+                <div className="text-primary mb-4">{feature.icon}</div>
                 <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
                 <p className="text-gray-600">{feature.description}</p>
               </motion.div>
@@ -99,8 +100,9 @@ const Index = () => {
             Start Tracking Misinformation Today
           </h2>
           <Button 
+            variant="secondary"
             onClick={() => navigate('/login')} 
-            className="btn-secondary"
+            className="bg-white text-primary hover:bg-gray-100"
           >
             Get Started
           </Button>
@@ -112,19 +114,19 @@ const Index = () => {
 
 const features = [
   {
-    icon: '📊',
+    icon: <ChartBar className="h-6 w-6" />,
     title: 'Real-time Analytics',
     description: 'Track and analyze misinformation trends as they emerge across various media channels.',
   },
   {
-    icon: '🎯',
-    title: 'Influencer Tracking',
-    description: 'Monitor key influencers and their impact on information spread.',
+    icon: <Globe className="h-6 w-6" />,
+    title: 'Geographic Insights',
+    description: 'Visualize the spread of misinformation across different regions in Ethiopia.',
   },
   {
-    icon: '🔍',
-    title: 'Fact Checking',
-    description: 'Access verified data from trusted Ethiopian academic sources.',
+    icon: <TrendingUp className="h-6 w-6" />,
+    title: 'Influencer Tracking',
+    description: 'Monitor key influencers and their impact on information spread.',
   },
 ];
 
