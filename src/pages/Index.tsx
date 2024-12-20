@@ -2,29 +2,23 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { supabase } from '@/integrations/supabase/client';
 import { ChartBar, Globe, TrendingUp } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const Index = () => {
-  const [email, setEmail] = useState('');
   const navigate = useNavigate();
 
-  const handleDemoRequest = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const checkSession = async () => {
     const { data: { session } } = await supabase.auth.getSession();
-    
     if (session) {
       navigate('/dashboard');
     } else {
-      console.log('Demo requested for:', email);
-      // Handle demo request logic here
+      navigate('/login');
     }
   };
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Hero Section */}
       <motion.section 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -53,24 +47,16 @@ const Index = () => {
             transition={{ delay: 0.4 }}
             className="max-w-md mx-auto"
           >
-            <form onSubmit={handleDemoRequest} className="space-y-4">
-              <Input
-                type="email"
-                placeholder="Enter your email for a demo"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="input-field"
-                required
-              />
-              <Button type="submit" className="w-full">
-                Request Demo Access
-              </Button>
-            </form>
+            <Button 
+              onClick={checkSession}
+              className="w-full"
+            >
+              Access Dashboard
+            </Button>
           </motion.div>
         </div>
       </motion.section>
 
-      {/* Features Section */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-12">Key Features</h2>
@@ -93,7 +79,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
       <section className="py-20 bg-primary text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-8">

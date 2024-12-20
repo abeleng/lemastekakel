@@ -9,6 +9,74 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      academic_sources: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: number
+          keywords: string[] | null
+          publication_date: string | null
+          source: string
+          title: string
+          verified: boolean | null
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: number
+          keywords?: string[] | null
+          publication_date?: string | null
+          source: string
+          title: string
+          verified?: boolean | null
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: number
+          keywords?: string[] | null
+          publication_date?: string | null
+          source?: string
+          title?: string
+          verified?: boolean | null
+        }
+        Relationships: []
+      }
+      content_analysis: {
+        Row: {
+          analysis_type: string
+          confidence_score: number | null
+          content_id: number | null
+          created_at: string | null
+          id: number
+          result: Json
+        }
+        Insert: {
+          analysis_type: string
+          confidence_score?: number | null
+          content_id?: number | null
+          created_at?: string | null
+          id?: number
+          result: Json
+        }
+        Update: {
+          analysis_type?: string
+          confidence_score?: number | null
+          content_id?: number | null
+          created_at?: string | null
+          id?: number
+          result?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_analysis_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "misinformation_logs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       geographic_distribution: {
         Row: {
           id: number
@@ -184,6 +252,33 @@ export type Database = {
           name?: string
           password_hash?: string
           role?: string | null
+        }
+        Relationships: []
+      }
+      workflow_logs: {
+        Row: {
+          completed_at: string | null
+          details: Json | null
+          id: number
+          started_at: string | null
+          status: string
+          workflow_type: string
+        }
+        Insert: {
+          completed_at?: string | null
+          details?: Json | null
+          id?: number
+          started_at?: string | null
+          status: string
+          workflow_type: string
+        }
+        Update: {
+          completed_at?: string | null
+          details?: Json | null
+          id?: number
+          started_at?: string | null
+          status?: string
+          workflow_type?: string
         }
         Relationships: []
       }

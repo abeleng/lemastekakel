@@ -6,8 +6,9 @@ import { TrendChart } from '@/components/dashboard/TrendChart';
 import { GeographicDistribution } from '@/components/dashboard/GeographicDistribution';
 import { InfluencerTable } from '@/components/dashboard/InfluencerTable';
 import { MisinformationStats } from '@/components/dashboard/MisinformationStats';
+import { AcademicSources } from '@/components/dashboard/AcademicSources';
 import { useToast } from '@/components/ui/use-toast';
-import { ChartBar, MapPin, User, TrendingUp, Globe } from 'lucide-react';
+import { ChartBar, MapPin, User, TrendingUp, Globe, BookOpen } from 'lucide-react';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -77,12 +78,22 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-sm">
-          <div className="flex items-center gap-2 mb-4">
-            <User className="h-5 w-5 text-primary" />
-            <h2 className="text-xl font-semibold">Top Influencers</h2>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="bg-white p-6 rounded-lg shadow-sm">
+            <div className="flex items-center gap-2 mb-4">
+              <BookOpen className="h-5 w-5 text-primary" />
+              <h2 className="text-xl font-semibold">Academic Sources</h2>
+            </div>
+            <AcademicSources />
           </div>
-          <InfluencerTable />
+          
+          <div className="bg-white p-6 rounded-lg shadow-sm">
+            <div className="flex items-center gap-2 mb-4">
+              <User className="h-5 w-5 text-primary" />
+              <h2 className="text-xl font-semibold">Top Influencers</h2>
+            </div>
+            <InfluencerTable />
+          </div>
         </div>
       </div>
     </div>
