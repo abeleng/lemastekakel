@@ -1,7 +1,8 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.1.3";
 
-const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -21,55 +22,52 @@ serve(async (req) => {
       throw new Error('Content is required');
     }
 
-    if (!openAIApiKey) {
-      throw new Error('OpenAI API key is not configured');
+    if (!geminiApiKey) {
+      throw new Error('Gemini API key is not configured');
     }
 
     console.log('Analyzing content:', content);
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are a fact-checking assistant specialized in Ethiopian news. Analyze the content and provide a detailed fact-check report in the following format: {"veracity": "true/false/partially true", "explanation": "detailed explanation", "sources": ["list of relevant sources"], "confidence": 0-1}'
-          },
-          {
-            role: 'user',
-            content: `Please analyze this content and provide a fact-check report: ${content}`
-          }
-        ],
-        max_tokens: 500,
-        temperature: 0.7
-      }),
-    });
+    const genAI = new GoogleGenerativeAI(geminiApiKey);
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error('OpenAI API error:', errorData);
-      throw new Error(`OpenAI API error: ${errorData.error?.message || 'Unknown error'}`);
+    const prompt = `Analyze this content and provide a detailed fact-check report. The content is related to potential misinformation in Ethiopia. Please structure your response in JSON format with the following fields:
+    {
+      "veracity": "true/false/partially true",
+      "explanation": "detailed explanation",
+      "sources": ["list of relevant sources"],
+      "confidence": 0-1
+    }
+    
+    Content to analyze: ${content}`;
+
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
+
+    console.log('Gemini Response:', text);
+
+    // Parse the response text as JSON
+    let analysis;
+    try {
+      analysis = JSON.parse(text);
+    } catch (error) {
+      console.error('Error parsing Gemini response:', error);
+      analysis = {
+        veracity: "unknown",
+        explanation: text,
+        sources: [],
+        confidence: 0.5
+      };
     }
 
-    const data = await response.json();
-    console.log('OpenAI Response:', data);
-
-    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-      throw new Error('Invalid response format from OpenAI');
-    }
-
-    const analysis = {
-      analysis: data.choices[0].message.content,
+    const finalResponse = {
+      analysis,
       timestamp: new Date().toISOString(),
-      model: 'gpt-4o-mini'
+      model: 'gemini-pro'
     };
 
-    return new Response(JSON.stringify(analysis), {
+    return new Response(JSON.stringify(finalResponse), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
