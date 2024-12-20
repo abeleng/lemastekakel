@@ -4,9 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { motion } from "framer-motion";
 import { CheckCircle, AlertTriangle, Clock } from "lucide-react";
-import type { Database } from "@/integrations/supabase/types";
+import type { Tables } from "@/integrations/supabase/types";
 
-type FactCheckRecord = Database['public']['Tables']['fact_check_records']['Row'];
+type FactCheckRecord = Tables['fact_check_records']['Row'];
 
 export const RecentFactChecks = () => {
   const [checks, setChecks] = useState<FactCheckRecord[]>([]);
@@ -40,9 +40,10 @@ export const RecentFactChecks = () => {
     };
   }, []);
 
-  const getVeracityIcon = (status) => {
-    if (status === 'true') return <CheckCircle className="h-5 w-5 text-green-500" />;
-    if (status === 'false') return <AlertTriangle className="h-5 w-5 text-red-500" />;
+  const getVeracityIcon = (result: FactCheckRecord['fact_check_result']) => {
+    if (!result) return <Clock className="h-5 w-5 text-yellow-500" />;
+    if (result.veracity === 'true') return <CheckCircle className="h-5 w-5 text-green-500" />;
+    if (result.veracity === 'false') return <AlertTriangle className="h-5 w-5 text-red-500" />;
     return <Clock className="h-5 w-5 text-yellow-500" />;
   };
 

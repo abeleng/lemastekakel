@@ -40,79 +40,111 @@ export type Database = {
           title?: string
           verified?: boolean | null
         }
+        Relationships: []
+      }
+      content_analysis: {
+        Row: {
+          analysis_type: string
+          confidence_score: number | null
+          content_id: number | null
+          created_at: string | null
+          id: number
+          result: Json
+        }
+        Insert: {
+          analysis_type: string
+          confidence_score?: number | null
+          content_id?: number | null
+          created_at?: string | null
+          id?: number
+          result: Json
+        }
+        Update: {
+          analysis_type?: string
+          confidence_score?: number | null
+          content_id?: number | null
+          created_at?: string | null
+          id?: number
+          result?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_analysis_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "misinformation_logs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       fact_check_records: {
         Row: {
-          id: number
-          title: string
-          original_content: string
-          source_url: string | null
-          fact_check_result: Json | null
-          verification_status: string | null
-          created_at: string | null
-          updated_at: string | null
           category: string | null
-          language: string | null
-          region: string | null
-          impact_score: number | null
-          shares_count: number | null
-        }
-        Insert: {
-          id?: number
-          title: string
-          original_content: string
-          source_url?: string | null
-          fact_check_result?: Json | null
-          verification_status?: string | null
-          created_at?: string | null
-          updated_at?: string | null
-          category?: string | null
-          language?: string | null
-          region?: string | null
-          impact_score?: number | null
-          shares_count?: number | null
-        }
-        Update: {
-          id?: number
-          title?: string
-          original_content?: string
-          source_url?: string | null
-          fact_check_result?: Json | null
-          verification_status?: string | null
-          created_at?: string | null
-          updated_at?: string | null
-          category?: string | null
-          language?: string | null
-          region?: string | null
-          impact_score?: number | null
-          shares_count?: number | null
-        }
-      }
-      misinformation_logs: {
-        Row: {
-          content: string
-          flag_status: string | null
-          flagged_at: string | null
+          created_at: string | null
+          fact_check_result: Json | null
           id: number
-          influencer_id: number | null
-          source: string | null
+          impact_score: number | null
+          language: string | null
+          original_content: string
+          region: string | null
+          shares_count: number | null
+          source_url: string | null
+          title: string
+          updated_at: string | null
+          verification_status: string | null
         }
         Insert: {
-          content: string
-          flag_status?: string | null
-          flagged_at?: string | null
+          category?: string | null
+          created_at?: string | null
+          fact_check_result?: Json | null
           id?: number
-          influencer_id?: number | null
-          source?: string | null
+          impact_score?: number | null
+          language?: string | null
+          original_content: string
+          region?: string | null
+          shares_count?: number | null
+          source_url?: string | null
+          title: string
+          updated_at?: string | null
+          verification_status?: string | null
         }
         Update: {
-          content?: string
-          flag_status?: string | null
-          flagged_at?: string | null
+          category?: string | null
+          created_at?: string | null
+          fact_check_result?: Json | null
           id?: number
-          influencer_id?: number | null
-          source?: string | null
+          impact_score?: number | null
+          language?: string | null
+          original_content?: string
+          region?: string | null
+          shares_count?: number | null
+          source_url?: string | null
+          title?: string
+          updated_at?: string | null
+          verification_status?: string | null
         }
+        Relationships: []
+      }
+      geographic_distribution: {
+        Row: {
+          id: number
+          last_updated: string | null
+          misinformation_count: number | null
+          region: string
+        }
+        Insert: {
+          id?: number
+          last_updated?: string | null
+          misinformation_count?: number | null
+          region: string
+        }
+        Update: {
+          id?: number
+          last_updated?: string | null
+          misinformation_count?: number | null
+          region?: string
+        }
+        Relationships: []
       }
       influencers: {
         Row: {
@@ -154,26 +186,42 @@ export type Database = {
           name?: string
           platform?: string | null
         }
+        Relationships: []
       }
-      geographic_distribution: {
+      misinformation_logs: {
         Row: {
+          content: string
+          flag_status: string | null
+          flagged_at: string | null
           id: number
-          last_updated: string | null
-          misinformation_count: number | null
-          region: string
+          influencer_id: number | null
+          source: string | null
         }
         Insert: {
+          content: string
+          flag_status?: string | null
+          flagged_at?: string | null
           id?: number
-          last_updated?: string | null
-          misinformation_count?: number | null
-          region: string
+          influencer_id?: number | null
+          source?: string | null
         }
         Update: {
+          content?: string
+          flag_status?: string | null
+          flagged_at?: string | null
           id?: number
-          last_updated?: string | null
-          misinformation_count?: number | null
-          region?: string
+          influencer_id?: number | null
+          source?: string | null
         }
+        Relationships: [
+          {
+            foreignKeyName: "misinformation_logs_influencer_id_fkey"
+            columns: ["influencer_id"]
+            isOneToOne: false
+            referencedRelation: "influencers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       misinformation_trends: {
         Row: {
@@ -197,6 +245,7 @@ export type Database = {
           time_period?: string | null
           topic?: string
         }
+        Relationships: []
       }
       user_activity_logs: {
         Row: {
@@ -217,6 +266,15 @@ export type Database = {
           timestamp?: string | null
           user_id?: number | null
         }
+        Relationships: [
+          {
+            foreignKeyName: "user_activity_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       users: {
         Row: {
@@ -243,6 +301,7 @@ export type Database = {
           password_hash?: string
           role?: string | null
         }
+        Relationships: []
       }
       workflow_logs: {
         Row: {
@@ -269,6 +328,7 @@ export type Database = {
           status?: string
           workflow_type?: string
         }
+        Relationships: []
       }
     }
     Views: {
@@ -295,7 +355,7 @@ export type Tables<
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
         Database[PublicTableNameOrOptions["schema"]]["Views"])
-    : never,
+    : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
       Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
