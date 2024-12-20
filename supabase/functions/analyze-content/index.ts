@@ -45,6 +45,8 @@ serve(async (req) => {
             content: `Please analyze this content and provide a fact-check report: ${content}`
           }
         ],
+        max_tokens: 500,
+        temperature: 0.7
       }),
     });
 
