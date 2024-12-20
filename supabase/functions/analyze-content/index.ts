@@ -9,12 +9,23 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
     const { content } = await req.json();
+
+    if (!content) {
+      throw new Error('Content is required');
+    }
+
+    if (!openAIApiKey) {
+      throw new Error('OpenAI API key is not configured');
+    }
+
+    console.log('Analyzing content:', content);
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -27,7 +38,7 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: 'You are a fact-checking assistant specialized in Ethiopian news. Analyze the content and provide a detailed fact-check report.'
+            content: 'You are a fact-checking assistant specialized in Ethiopian news. Analyze the content and provide a detailed fact-check report in the following format: {"veracity": "true/false/partially true", "explanation": "detailed explanation", "sources": ["list of relevant sources"], "confidence": 0-1}'
           },
           {
             role: 'user',
@@ -37,19 +48,35 @@ serve(async (req) => {
       }),
     });
 
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('OpenAI API error:', errorData);
+      throw new Error(`OpenAI API error: ${errorData.error?.message || 'Unknown error'}`);
+    }
+
     const data = await response.json();
     console.log('OpenAI Response:', data);
 
-    return new Response(JSON.stringify({ 
+    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+      throw new Error('Invalid response format from OpenAI');
+    }
+
+    const analysis = {
       analysis: data.choices[0].message.content,
-      timestamp: new Date().toISOString()
-    }), {
+      timestamp: new Date().toISOString(),
+      model: 'gpt-4o-mini'
+    };
+
+    return new Response(JSON.stringify(analysis), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
     console.error('Error in analyze-content function:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        details: error.stack
+      }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500,
