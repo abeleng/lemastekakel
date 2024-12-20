@@ -8,17 +8,15 @@ import { GeographicDistribution } from '@/components/dashboard/GeographicDistrib
 import { InfluencerTable } from '@/components/dashboard/InfluencerTable';
 import { MisinformationStats } from '@/components/dashboard/MisinformationStats';
 import { AcademicSources } from '@/components/dashboard/AcademicSources';
+import { FactCheckSection } from '@/components/dashboard/FactCheckSection';
+import { RecentFactChecks } from '@/components/dashboard/RecentFactChecks';
 import { useToast } from '@/components/ui/use-toast';
-import { ChartBar, MapPin, User, TrendingUp, Globe, BookOpen } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { LogOut } from 'lucide-react';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
-  const [recentContent, setRecentContent] = useState([]);
-  const [analyzing, setAnalyzing] = useState(false);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -27,63 +25,18 @@ const Dashboard = () => {
         navigate('/login');
       } else {
         setLoading(false);
-        fetchRecentContent();
       }
     };
     checkSession();
   }, [navigate]);
 
-  const fetchRecentContent = async () => {
-    const { data, error } = await supabase
-      .from('misinformation_logs')
-      .select('*')
-      .order('flagged_at', { ascending: false })
-      .limit(5);
-
-    if (error) {
-      toast({
-        title: "Error fetching content",
-        description: error.message,
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setRecentContent(data);
-  };
-
-  const analyzeContent = async (content) => {
-    setAnalyzing(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('analyze-content', {
-        body: { content },
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "Analysis Complete",
-        description: "Content has been analyzed successfully",
-      });
-
-      await supabase
-        .from('content_analysis')
-        .insert([{
-          content_id: content.id,
-          analysis_type: 'openai',
-          result: data.analysis,
-          confidence_score: 0.95,
-        }]);
-
-    } catch (error) {
-      toast({
-        title: "Analysis Failed",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setAnalyzing(false);
-    }
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate('/login');
+    toast({
+      title: "Signed out successfully",
+      description: "You have been logged out of your account.",
+    });
   };
 
   if (loading) {
@@ -108,15 +61,10 @@ const Dashboard = () => {
           </div>
           <Button 
             variant="outline" 
-            onClick={async () => {
-              await supabase.auth.signOut();
-              navigate('/login');
-              toast({
-                title: "Signed out successfully",
-                description: "You have been logged out of your account.",
-              });
-            }}
+            onClick={handleSignOut}
+            className="flex items-center gap-2"
           >
+            <LogOut className="h-4 w-4" />
             Sign Out
           </Button>
         </motion.header>
@@ -134,25 +82,37 @@ const Dashboard = () => {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-white p-6 rounded-xl shadow-sm"
           >
-            <div className="flex items-center gap-2 mb-4">
-              <TrendingUp className="h-5 w-5 text-primary" />
-              <h2 className="text-xl font-semibold">Misinformation Trends</h2>
-            </div>
-            <TrendChart />
+            <FactCheckSection />
           </motion.div>
           
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.4 }}
+          >
+            <RecentFactChecks />
+          </motion.div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.5 }}
             className="bg-white p-6 rounded-xl shadow-sm"
           >
-            <div className="flex items-center gap-2 mb-4">
-              <Globe className="h-5 w-5 text-primary" />
-              <h2 className="text-xl font-semibold">Geographic Distribution</h2>
-            </div>
+            <h2 className="text-xl font-semibold mb-4">Misinformation Trends</h2>
+            <TrendChart />
+          </motion.div>
+          
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.6 }}
+            className="bg-white p-6 rounded-xl shadow-sm"
+          >
+            <h2 className="text-xl font-semibold mb-4">Geographic Distribution</h2>
             <GeographicDistribution />
           </motion.div>
         </div>
@@ -160,62 +120,18 @@ const Dashboard = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="grid grid-cols-1 lg:grid-cols-2 gap-8"
+          transition={{ delay: 0.7 }}
+          className="grid grid-cols-1 gap-8"
         >
-          <Card className="bg-white shadow-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BookOpen className="h-5 w-5 text-primary" />
-                Recent Content Analysis
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ScrollArea className="h-[400px] pr-4">
-                {recentContent.map((content) => (
-                  <motion.div
-                    key={content.id}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="mb-4 p-4 border rounded-lg hover:border-primary transition-colors"
-                  >
-                    <p className="text-sm text-gray-600 mb-2">
-                      {new Date(content.flagged_at).toLocaleDateString()}
-                    </p>
-                    <p className="mb-2">{content.content}</p>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => analyzeContent(content)}
-                      disabled={analyzing}
-                    >
-                      {analyzing ? 'Analyzing...' : 'Analyze Content'}
-                    </Button>
-                  </motion.div>
-                ))}
-              </ScrollArea>
-            </CardContent>
-          </Card>
+          <div className="bg-white p-6 rounded-xl shadow-sm">
+            <h2 className="text-xl font-semibold mb-4">Key Influencers</h2>
+            <InfluencerTable />
+          </div>
           
-          <Card className="bg-white shadow-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5 text-primary" />
-                Top Influencers
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <InfluencerTable />
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-        >
-          <AcademicSources />
+          <div className="bg-white p-6 rounded-xl shadow-sm">
+            <h2 className="text-xl font-semibold mb-4">Academic Sources</h2>
+            <AcademicSources />
+          </div>
         </motion.div>
       </div>
     </div>
