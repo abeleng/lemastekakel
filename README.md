@@ -1,69 +1,85 @@
-# Welcome to your Lovable project
+# LeMastekakel - Ethiopian Misinformation Tracking Platform
 
-## Project info
+## Overview
 
-**URL**: https://lovable.dev/projects/8a3e1b11-53fe-4422-a3b4-95944692eb3a
+LeMastekakel is a sophisticated platform designed to track, analyze, and combat misinformation in Ethiopia. The platform integrates real-time data analysis, academic sources, and AI-powered content verification to provide a comprehensive solution for monitoring and addressing misinformation.
 
-## How can I edit this code?
+## Features
 
-There are several ways of editing your application.
+- **Real-time Analytics Dashboard**: Monitor misinformation trends and patterns
+- **Geographic Distribution**: Visualize the spread of misinformation across Ethiopia
+- **AI-Powered Content Analysis**: Leverage OpenAI for fact-checking and content verification
+- **Academic Source Integration**: Access verified academic sources and research
+- **Influencer Tracking**: Monitor key influencers and their impact
+- **Automated Workflows**: Streamline content analysis and verification processes
 
-**Use Lovable**
+## Project Structure
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/8a3e1b11-53fe-4422-a3b4-95944692eb3a) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── dashboard/
+│   │   │   └── ui/
+│   │   ├── pages/
+│   │   ├── hooks/
+│   │   └── integrations/
+│   └── public/
+├── backend/
+│   ├── supabase/
+│   │   ├── functions/
+│   │   └── migrations/
+│   └── edge-functions/
+└── docs/
 ```
 
-**Edit a file directly in GitHub**
+## Technology Stack
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- **Frontend**: React, TypeScript, Tailwind CSS, shadcn/ui
+- **Backend**: Supabase, Edge Functions
+- **Database**: PostgreSQL (via Supabase)
+- **AI Integration**: OpenAI GPT-4
+- **Authentication**: Supabase Auth
+- **Analytics**: Recharts
 
-**Use GitHub Codespaces**
+## Getting Started
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Set up environment variables:
+   - SUPABASE_URL
+   - SUPABASE_ANON_KEY
+   - OPENAI_API_KEY
+4. Run the development server: `npm run dev`
 
-## What technologies are used for this project?
+## Backend Setup
 
-This project is built with .
+The backend is powered by Supabase and includes:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- Database tables for storing misinformation data
+- Edge Functions for AI-powered content analysis
+- Real-time subscriptions for live updates
+- Row Level Security policies for data protection
 
-## How can I deploy this project?
+## Frontend Architecture
 
-Simply open [Lovable](https://lovable.dev/projects/8a3e1b11-53fe-4422-a3b4-95944692eb3a) and click on Share -> Publish.
+The frontend is built with React and organized into:
 
-## I want to use a custom domain - is that possible?
+- Reusable UI components
+- Page components
+- Custom hooks
+- Integration utilities
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Submit a pull request
+
+## License
+
+MIT License
+
+## Contact
+
+For support or inquiries, please open an issue in the repository.
