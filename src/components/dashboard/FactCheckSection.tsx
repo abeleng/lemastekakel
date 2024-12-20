@@ -7,12 +7,15 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, CheckCircle, AlertTriangle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import type { Database } from "@/integrations/supabase/types";
+
+type FactCheckResult = Database['public']['Tables']['fact_check_records']['Row']['fact_check_result'];
 
 export const FactCheckSection = () => {
   const [content, setContent] = useState('');
   const [title, setTitle] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [result, setResult] = useState(null);
+  const [result, setResult] = useState<FactCheckResult>(null);
   const { toast } = useToast();
 
   const analyzeContent = async () => {
@@ -36,12 +39,16 @@ export const FactCheckSection = () => {
       setResult(data.analysis);
 
       // Save to database
-      await supabase.from('fact_check_records').insert({
-        title: title || 'Untitled Check',
-        original_content: content,
-        fact_check_result: data.analysis,
-        verification_status: 'completed'
-      });
+      const { error: insertError } = await supabase
+        .from('fact_check_records')
+        .insert({
+          title: title || 'Untitled Check',
+          original_content: content,
+          fact_check_result: data.analysis,
+          verification_status: 'completed'
+        });
+
+      if (insertError) throw insertError;
 
       toast({
         title: "Analysis Complete",

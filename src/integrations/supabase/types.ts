@@ -40,63 +40,79 @@ export type Database = {
           title?: string
           verified?: boolean | null
         }
-        Relationships: []
       }
-      content_analysis: {
+      fact_check_records: {
         Row: {
-          analysis_type: string
-          confidence_score: number | null
-          content_id: number | null
+          id: number
+          title: string
+          original_content: string
+          source_url: string | null
+          fact_check_result: Json | null
+          verification_status: string | null
           created_at: string | null
-          id: number
-          result: Json
+          updated_at: string | null
+          category: string | null
+          language: string | null
+          region: string | null
+          impact_score: number | null
+          shares_count: number | null
         }
         Insert: {
-          analysis_type: string
-          confidence_score?: number | null
-          content_id?: number | null
-          created_at?: string | null
           id?: number
-          result: Json
+          title: string
+          original_content: string
+          source_url?: string | null
+          fact_check_result?: Json | null
+          verification_status?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+          category?: string | null
+          language?: string | null
+          region?: string | null
+          impact_score?: number | null
+          shares_count?: number | null
         }
         Update: {
-          analysis_type?: string
-          confidence_score?: number | null
-          content_id?: number | null
-          created_at?: string | null
           id?: number
-          result?: Json
+          title?: string
+          original_content?: string
+          source_url?: string | null
+          fact_check_result?: Json | null
+          verification_status?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+          category?: string | null
+          language?: string | null
+          region?: string | null
+          impact_score?: number | null
+          shares_count?: number | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "content_analysis_content_id_fkey"
-            columns: ["content_id"]
-            isOneToOne: false
-            referencedRelation: "misinformation_logs"
-            referencedColumns: ["id"]
-          },
-        ]
       }
-      geographic_distribution: {
+      misinformation_logs: {
         Row: {
+          content: string
+          flag_status: string | null
+          flagged_at: string | null
           id: number
-          last_updated: string | null
-          misinformation_count: number | null
-          region: string
+          influencer_id: number | null
+          source: string | null
         }
         Insert: {
+          content: string
+          flag_status?: string | null
+          flagged_at?: string | null
           id?: number
-          last_updated?: string | null
-          misinformation_count?: number | null
-          region: string
+          influencer_id?: number | null
+          source?: string | null
         }
         Update: {
+          content?: string
+          flag_status?: string | null
+          flagged_at?: string | null
           id?: number
-          last_updated?: string | null
-          misinformation_count?: number | null
-          region?: string
+          influencer_id?: number | null
+          source?: string | null
         }
-        Relationships: []
       }
       influencers: {
         Row: {
@@ -138,42 +154,26 @@ export type Database = {
           name?: string
           platform?: string | null
         }
-        Relationships: []
       }
-      misinformation_logs: {
+      geographic_distribution: {
         Row: {
-          content: string
-          flag_status: string | null
-          flagged_at: string | null
           id: number
-          influencer_id: number | null
-          source: string | null
+          last_updated: string | null
+          misinformation_count: number | null
+          region: string
         }
         Insert: {
-          content: string
-          flag_status?: string | null
-          flagged_at?: string | null
           id?: number
-          influencer_id?: number | null
-          source?: string | null
+          last_updated?: string | null
+          misinformation_count?: number | null
+          region: string
         }
         Update: {
-          content?: string
-          flag_status?: string | null
-          flagged_at?: string | null
           id?: number
-          influencer_id?: number | null
-          source?: string | null
+          last_updated?: string | null
+          misinformation_count?: number | null
+          region?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "misinformation_logs_influencer_id_fkey"
-            columns: ["influencer_id"]
-            isOneToOne: false
-            referencedRelation: "influencers"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       misinformation_trends: {
         Row: {
@@ -197,7 +197,6 @@ export type Database = {
           time_period?: string | null
           topic?: string
         }
-        Relationships: []
       }
       user_activity_logs: {
         Row: {
@@ -218,15 +217,6 @@ export type Database = {
           timestamp?: string | null
           user_id?: number | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "user_activity_logs_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       users: {
         Row: {
@@ -253,7 +243,6 @@ export type Database = {
           password_hash?: string
           role?: string | null
         }
-        Relationships: []
       }
       workflow_logs: {
         Row: {
@@ -280,7 +269,6 @@ export type Database = {
           status?: string
           workflow_type?: string
         }
-        Relationships: []
       }
     }
     Views: {
@@ -307,7 +295,7 @@ export type Tables<
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
         Database[PublicTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
       Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {

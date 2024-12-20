@@ -4,9 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { motion } from "framer-motion";
 import { CheckCircle, AlertTriangle, Clock } from "lucide-react";
+import type { Database } from "@/integrations/supabase/types";
+
+type FactCheckRecord = Database['public']['Tables']['fact_check_records']['Row'];
 
 export const RecentFactChecks = () => {
-  const [checks, setChecks] = useState([]);
+  const [checks, setChecks] = useState<FactCheckRecord[]>([]);
 
   useEffect(() => {
     const fetchChecks = async () => {
