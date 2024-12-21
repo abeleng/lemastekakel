@@ -2,21 +2,32 @@ import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
-import mapboxgl, { GeoJSONSource } from 'mapbox-gl';
+import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
-type Point = GeoJSON.Feature<GeoJSON.Point> & {
+interface GeoPoint {
+  type: 'Feature';
+  geometry: {
+    type: 'Point';
+    coordinates: [number, number];
+  };
   properties: {
     count: number;
     region: string;
     insights: any;
   };
-};
+}
+
+interface GeoData {
+  region: string;
+  misinformation_count: number;
+  ai_insights: any;
+}
 
 export const GeoMap = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<GeoData[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -60,24 +71,26 @@ export const GeoMap = () => {
     map.current.on('load', () => {
       if (!map.current) return;
 
+      const geoJsonData: { type: 'FeatureCollection', features: GeoPoint[] } = {
+        type: 'FeatureCollection',
+        features: data.map(point => ({
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: getCoordinatesFromRegion(point.region),
+          },
+          properties: {
+            count: point.misinformation_count || 0,
+            region: point.region,
+            insights: point.ai_insights,
+          },
+        })),
+      };
+
       // Add a data source
       map.current.addSource('misinformation-points', {
         type: 'geojson',
-        data: {
-          type: 'FeatureCollection',
-          features: data.map(point => ({
-            type: 'Feature',
-            geometry: {
-              type: 'Point',
-              coordinates: getCoordinatesFromRegion(point.region),
-            },
-            properties: {
-              count: point.misinformation_count,
-              region: point.region,
-              insights: point.ai_insights,
-            },
-          })) as Point[],
-        },
+        data: geoJsonData,
       });
 
       // Add a layer to visualize the points
@@ -114,8 +127,8 @@ export const GeoMap = () => {
       map.current.on('click', 'misinformation-heat', (e) => {
         if (!e.features?.[0]) return;
         
-        const feature = e.features[0] as Point;
-        const coordinates = feature.geometry.coordinates.slice();
+        const feature = e.features[0] as GeoPoint;
+        const coordinates = feature.geometry.coordinates;
         const properties = feature.properties;
         
         new mapboxgl.Popup()
