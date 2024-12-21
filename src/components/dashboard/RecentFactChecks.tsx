@@ -8,6 +8,13 @@ import type { Database } from "@/integrations/supabase/types";
 
 type FactCheckRecord = Database['public']['Tables']['fact_check_records']['Row'];
 
+interface FactCheckResult {
+  veracity: 'true' | 'false' | 'uncertain';
+  explanation: string;
+  sources: string[];
+  confidence: number;
+}
+
 export const RecentFactChecks = () => {
   const [checks, setChecks] = useState<FactCheckRecord[]>([]);
 
@@ -40,7 +47,7 @@ export const RecentFactChecks = () => {
     };
   }, []);
 
-  const getVeracityIcon = (result: FactCheckRecord['fact_check_result']) => {
+  const getVeracityIcon = (result: FactCheckResult | null) => {
     if (!result) return <Clock className="h-5 w-5 text-yellow-500" />;
     if (result.veracity === 'true') return <CheckCircle className="h-5 w-5 text-green-500" />;
     if (result.veracity === 'false') return <AlertTriangle className="h-5 w-5 text-red-500" />;
@@ -66,7 +73,7 @@ export const RecentFactChecks = () => {
             >
               <div className="flex items-start gap-4">
                 <div className="mt-1">
-                  {getVeracityIcon(check.fact_check_result?.veracity)}
+                  {getVeracityIcon(check.fact_check_result as FactCheckResult)}
                 </div>
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold mb-2">{check.title}</h3>
@@ -76,11 +83,11 @@ export const RecentFactChecks = () => {
                   {check.fact_check_result && (
                     <div className="bg-gray-50 p-4 rounded-lg">
                       <p className="text-sm text-gray-700">
-                        {check.fact_check_result.explanation}
+                        {(check.fact_check_result as FactCheckResult).explanation}
                       </p>
-                      {check.fact_check_result.sources?.length > 0 && (
+                      {(check.fact_check_result as FactCheckResult).sources?.length > 0 && (
                         <div className="mt-2 text-sm text-blue-600">
-                          Sources: {check.fact_check_result.sources.join(', ')}
+                          Sources: {(check.fact_check_result as FactCheckResult).sources.join(', ')}
                         </div>
                       )}
                     </div>
