@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
-import mapboxgl from 'mapbox-gl';
+import mapboxgl, { MapboxGeoJSONFeature } from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 interface GeoPoint {
@@ -127,9 +127,11 @@ export const GeoMap = () => {
       map.current.on('click', 'misinformation-heat', (e) => {
         if (!e.features?.[0]) return;
         
-        const feature = e.features[0] as GeoPoint;
-        const coordinates = feature.geometry.coordinates;
-        const properties = feature.properties;
+        const feature = e.features[0] as MapboxGeoJSONFeature;
+        const coordinates = feature.geometry.type === 'Point' 
+          ? (feature.geometry.coordinates as [number, number])
+          : [0, 0];
+        const properties = feature.properties as GeoPoint['properties'];
         
         new mapboxgl.Popup()
           .setLngLat(coordinates)

@@ -76,7 +76,7 @@ export const RecentFactChecks = () => {
       <CardContent className="p-0">
         <ScrollArea className="h-[600px]">
           {checks.map((check, index) => {
-            const result = check.fact_check_result as FactCheckResult;
+            const result = check.fact_check_result as unknown as FactCheckResult;
             return (
               <motion.div
                 key={check.id}
