@@ -130,7 +130,7 @@ export const GeoMap = () => {
         const feature = e.features[0] as MapboxGeoJSONFeature;
         const coordinates = feature.geometry.type === 'Point' 
           ? (feature.geometry.coordinates as [number, number])
-          : [0, 0];
+          : [0, 0] as [number, number]; // Explicitly type the fallback coordinates
         const properties = feature.properties as GeoPoint['properties'];
         
         new mapboxgl.Popup()
