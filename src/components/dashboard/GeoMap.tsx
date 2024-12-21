@@ -2,12 +2,12 @@ import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
-import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
 
 export const GeoMap = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const mapContainer = useRef<HTMLDivElement>(null);
+  const map = useRef<mapboxgl.Map | null>(null);
   const [data, setData] = useState<any[]>([]);
   const { toast } = useToast();
 
@@ -33,89 +33,103 @@ export const GeoMap = () => {
   };
 
   useEffect(() => {
-    if (!containerRef.current || !data.length) return;
+    if (!mapContainer.current || !data.length) return;
 
-    // Three.js setup
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, containerRef.current.clientWidth / containerRef.current.clientHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    // Initialize map
+    mapboxgl.accessToken = process.env.MAPBOX_PUBLIC_TOKEN || '';
     
-    renderer.setSize(containerRef.current.clientWidth, containerRef.current.clientHeight);
-    containerRef.current.appendChild(renderer.domElement);
-
-    // Add lights
-    const ambientLight = new THREE.AmbientLight(0x404040);
-    scene.add(ambientLight);
-
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-    directionalLight.position.set(5, 5, 5);
-    scene.add(directionalLight);
-
-    // Add Earth sphere
-    const earthGeometry = new THREE.SphereGeometry(5, 32, 32);
-    const earthMaterial = new THREE.MeshPhongMaterial({
-      map: new THREE.TextureLoader().load('/earth-texture.jpg'),
-      bumpMap: new THREE.TextureLoader().load('/earth-bump.jpg'),
-      bumpScale: 0.05,
+    map.current = new mapboxgl.Map({
+      container: mapContainer.current,
+      style: 'mapbox://styles/mapbox/light-v11',
+      center: [40, 9], // Center on Ethiopia
+      zoom: 5,
     });
-    const earth = new THREE.Mesh(earthGeometry, earthMaterial);
-    scene.add(earth);
 
-    // Add data points
-    data.forEach((point) => {
-      const markerGeometry = new THREE.SphereGeometry(0.1, 16, 16);
-      const markerMaterial = new THREE.MeshPhongMaterial({ 
-        color: new THREE.Color(`hsl(${(point.misinformation_count / 100) * 360}, 70%, 50%)`),
-        emissive: new THREE.Color(`hsl(${(point.misinformation_count / 100) * 360}, 70%, 50%)`),
-        emissiveIntensity: 0.5,
+    // Add navigation controls
+    map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+
+    // Add data points when map loads
+    map.current.on('load', () => {
+      if (!map.current) return;
+
+      // Add a data source
+      map.current.addSource('misinformation-points', {
+        type: 'geojson',
+        data: {
+          type: 'FeatureCollection',
+          features: data.map(point => ({
+            type: 'Feature',
+            geometry: {
+              type: 'Point',
+              coordinates: getCoordinatesFromRegion(point.region),
+            },
+            properties: {
+              count: point.misinformation_count,
+              region: point.region,
+              insights: point.ai_insights,
+            },
+          })),
+        },
       });
-      const marker = new THREE.Mesh(markerGeometry, markerMaterial);
-      
-      // Position marker based on region (simplified for example)
-      const position = getPositionFromRegion(point.region);
-      marker.position.set(position.x, position.y, position.z);
-      scene.add(marker);
+
+      // Add a layer to visualize the points
+      map.current.addLayer({
+        id: 'misinformation-heat',
+        type: 'heatmap',
+        source: 'misinformation-points',
+        paint: {
+          'heatmap-weight': [
+            'interpolate',
+            ['linear'],
+            ['get', 'count'],
+            0, 0,
+            100, 1
+          ],
+          'heatmap-intensity': 1,
+          'heatmap-color': [
+            'interpolate',
+            ['linear'],
+            ['heatmap-density'],
+            0, 'rgba(0,0,255,0)',
+            0.2, 'rgb(0,0,255)',
+            0.4, 'rgb(0,255,0)',
+            0.6, 'rgb(255,255,0)',
+            0.8, 'rgb(255,128,0)',
+            1, 'rgb(255,0,0)'
+          ],
+          'heatmap-radius': 30,
+          'heatmap-opacity': 0.8
+        }
+      });
+
+      // Add popup on click
+      map.current.on('click', 'misinformation-heat', (e) => {
+        if (!e.features?.[0]) return;
+        
+        const coordinates = e.features[0].geometry.coordinates.slice();
+        const properties = e.features[0].properties;
+        
+        new mapboxgl.Popup()
+          .setLngLat(coordinates)
+          .setHTML(`
+            <h3 class="font-bold">${properties.region}</h3>
+            <p>Misinformation Count: ${properties.count}</p>
+            ${properties.insights ? `<p class="text-sm mt-2">${properties.insights.analysis}</p>` : ''}
+          `)
+          .addTo(map.current!);
+      });
     });
-
-    // Set up camera and controls
-    camera.position.z = 15;
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
-    controls.rotateSpeed = 0.5;
-
-    // Animation loop
-    const animate = () => {
-      requestAnimationFrame(animate);
-      earth.rotation.y += 0.001;
-      controls.update();
-      renderer.render(scene, camera);
-    };
-    animate();
-
-    // Handle window resize
-    const handleResize = () => {
-      if (!containerRef.current) return;
-      camera.aspect = containerRef.current.clientWidth / containerRef.current.clientHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(containerRef.current.clientWidth, containerRef.current.clientHeight);
-    };
-    window.addEventListener('resize', handleResize);
 
     // Cleanup
     return () => {
-      window.removeEventListener('resize', handleResize);
-      if (containerRef.current) {
-        containerRef.current.removeChild(renderer.domElement);
-      }
-      renderer.dispose();
+      map.current?.remove();
     };
   }, [data]);
 
   return (
     <Card className="p-6">
       <h2 className="text-2xl font-semibold mb-6">Geographic Distribution of Misinformation</h2>
-      <div ref={containerRef} className="h-[600px] w-full" />
+      <div ref={mapContainer} className="h-[600px] w-full rounded-lg overflow-hidden" />
       {data[0]?.ai_insights && (
         <div className="mt-6">
           <h3 className="text-xl font-semibold mb-4">AI Geographic Insights</h3>
@@ -126,15 +140,22 @@ export const GeoMap = () => {
   );
 };
 
-// Helper function to convert region names to 3D coordinates
-const getPositionFromRegion = (region: string) => {
-  // This is a simplified example - you would need a proper mapping of Ethiopian regions to coordinates
-  const coordinates: { [key: string]: { x: number, y: number, z: number } } = {
-    'Addis Ababa': { x: 5, y: 0, z: 0 },
-    'Oromia': { x: 4, y: 2, z: 2 },
-    'Amhara': { x: 3, y: -2, z: 3 },
-    // Add more regions as needed
+// Helper function to convert region names to coordinates
+const getCoordinatesFromRegion = (region: string): [number, number] => {
+  // Approximate coordinates for Ethiopian regions
+  const coordinates: { [key: string]: [number, number] } = {
+    'Addis Ababa': [38.7578, 9.0222],
+    'Oromia': [40.0000, 8.0000],
+    'Amhara': [38.5000, 11.5000],
+    'Tigray': [39.0000, 14.0000],
+    'Somali': [44.0000, 7.0000],
+    'SNNPR': [37.0000, 6.5000],
+    'Afar': [41.0000, 12.0000],
+    'Benishangul-Gumuz': [35.0000, 10.0000],
+    'Gambela': [34.5000, 8.0000],
+    'Harari': [42.1500, 9.3200],
+    'Dire Dawa': [41.8600, 9.5900],
   };
 
-  return coordinates[region] || { x: 0, y: 0, z: 5 };
+  return coordinates[region] || [40, 9]; // Default to center of Ethiopia if region not found
 };

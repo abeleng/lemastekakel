@@ -4,9 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { motion } from "framer-motion";
 import { CheckCircle, AlertTriangle, Clock } from "lucide-react";
-import type { Tables } from "@/integrations/supabase/types";
+import type { Database } from "@/integrations/supabase/types";
 
-type FactCheckRecord = Tables['fact_check_records']['Row'];
+type FactCheckRecord = Database['public']['Tables']['fact_check_records']['Row'];
 
 export const RecentFactChecks = () => {
   const [checks, setChecks] = useState<FactCheckRecord[]>([]);

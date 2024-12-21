@@ -1,5 +1,13 @@
 import type { FactCheckResult } from '@/types/fact-check';
 
+type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[];
+
 export interface Tables {
   fact_check_records: {
     Row: {
