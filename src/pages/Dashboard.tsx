@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { TrendChart } from '@/components/dashboard/TrendChart';
+import { TrendAnalysis } from '@/components/dashboard/TrendAnalysis';
+import { GeoMap } from '@/components/dashboard/GeoMap';
 import { GeographicDistribution } from '@/components/dashboard/GeographicDistribution';
 import { InfluencerTable } from '@/components/dashboard/InfluencerTable';
 import { MisinformationStats } from '@/components/dashboard/MisinformationStats';
@@ -95,39 +96,50 @@ const Dashboard = () => {
           </motion.div>
         </div>
 
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+        >
+          <TrendAnalysis />
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+        >
+          <GeoMap />
+        </motion.div>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.5 }}
+            transition={{ delay: 0.7 }}
             className="bg-white p-6 rounded-xl shadow-sm"
           >
-            <h2 className="text-xl font-semibold mb-4">Misinformation Trends</h2>
-            <TrendChart />
+            <h2 className="text-xl font-semibold mb-4">Geographic Distribution</h2>
+            <GeographicDistribution />
           </motion.div>
           
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.6 }}
+            transition={{ delay: 0.8 }}
             className="bg-white p-6 rounded-xl shadow-sm"
           >
-            <h2 className="text-xl font-semibold mb-4">Geographic Distribution</h2>
-            <GeographicDistribution />
+            <h2 className="text-xl font-semibold mb-4">Key Influencers</h2>
+            <InfluencerTable />
           </motion.div>
         </div>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7 }}
+          transition={{ delay: 0.9 }}
           className="grid grid-cols-1 gap-8"
         >
-          <div className="bg-white p-6 rounded-xl shadow-sm">
-            <h2 className="text-xl font-semibold mb-4">Key Influencers</h2>
-            <InfluencerTable />
-          </div>
-          
           <div className="bg-white p-6 rounded-xl shadow-sm">
             <h2 className="text-xl font-semibold mb-4">Academic Sources</h2>
             <AcademicSources />

@@ -1,1 +1,27 @@
 project_id = "otozsedjhqzxztkoslea"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage"]
+
+[db]
+port = 54322
+
+[studio]
+enabled = true
+port = 54323
+
+[inbucket]
+enabled = true
+port = 54324
+
+[storage]
+enabled = true
+
+[auth]
+enabled = true
+
+[[functions]]
+name = "analyze-trends"
+verify_jwt = true

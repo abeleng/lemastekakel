@@ -127,18 +127,21 @@ export type Database = {
       }
       geographic_distribution: {
         Row: {
+          ai_insights: Json | null
           id: number
           last_updated: string | null
           misinformation_count: number | null
           region: string
         }
         Insert: {
+          ai_insights?: Json | null
           id?: number
           last_updated?: string | null
           misinformation_count?: number | null
           region: string
         }
         Update: {
+          ai_insights?: Json | null
           id?: number
           last_updated?: string | null
           misinformation_count?: number | null
@@ -225,6 +228,7 @@ export type Database = {
       }
       misinformation_trends: {
         Row: {
+          ai_analysis: Json | null
           frequency: number | null
           id: number
           sentiment: number | null
@@ -232,6 +236,7 @@ export type Database = {
           topic: string
         }
         Insert: {
+          ai_analysis?: Json | null
           frequency?: number | null
           id?: number
           sentiment?: number | null
@@ -239,6 +244,7 @@ export type Database = {
           topic: string
         }
         Update: {
+          ai_analysis?: Json | null
           frequency?: number | null
           id?: number
           sentiment?: number | null
