@@ -64,6 +64,19 @@ export const FactCheckSection = () => {
     }
   };
 
+  const getVeracityColor = (veracity: string) => {
+    switch (veracity.toLowerCase()) {
+      case 'true':
+        return 'text-green-600';
+      case 'false':
+        return 'text-red-600';
+      case 'partially true':
+        return 'text-yellow-600';
+      default:
+        return 'text-gray-600';
+    }
+  };
+
   return (
     <Card className="w-full bg-white shadow-lg rounded-xl overflow-hidden">
       <CardHeader className="bg-gradient-to-r from-primary to-secondary p-6">
@@ -110,40 +123,44 @@ export const FactCheckSection = () => {
               className="mt-6 space-y-4"
             >
               <div className="flex items-center gap-2">
-                <div className="text-lg font-semibold">Veracity:</div>
-                <div className="flex items-center">
-                  {result.veracity === 'true' && (
-                    <CheckCircle className="h-5 w-5 text-green-500" />
-                  )}
-                  {result.veracity === 'false' && (
-                    <AlertTriangle className="h-5 w-5 text-red-500" />
-                  )}
-                  <span className="ml-2">{result.veracity}</span>
+                <div className="text-lg font-semibold">Verdict:</div>
+                <div className={`flex items-center ${getVeracityColor(result.veracity)}`}>
+                  {result.veracity === 'true' && <CheckCircle className="h-5 w-5 mr-2" />}
+                  {result.veracity === 'false' && <AlertTriangle className="h-5 w-5 mr-2" />}
+                  <span className="capitalize">{result.veracity}</span>
                 </div>
               </div>
-              <div>
-                <div className="text-lg font-semibold">Explanation:</div>
-                <p className="mt-2 text-gray-700">{result.explanation}</p>
+              <div className="bg-gray-50 rounded-lg p-4">
+                <div className="text-lg font-semibold mb-2">Analysis:</div>
+                <p className="text-gray-700 leading-relaxed">{result.explanation}</p>
               </div>
-              <div>
-                <div className="text-lg font-semibold">Sources:</div>
-                <ul className="list-disc list-inside mt-2">
-                  {result.sources.map((source, index) => (
-                    <li key={index} className="text-blue-600 hover:underline">
-                      {source}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="text-lg font-semibold">Confidence:</div>
-                <div className="flex-1 bg-gray-200 rounded-full h-2">
+              {result.sources && result.sources.length > 0 && (
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <div className="text-lg font-semibold mb-2">Sources:</div>
+                  <ul className="list-disc list-inside space-y-1">
+                    {result.sources.map((source, index) => (
+                      <li key={index} className="text-blue-600 hover:underline">
+                        <a href={source} target="_blank" rel="noopener noreferrer">
+                          {source}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              <div className="bg-gray-50 rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div className="text-lg font-semibold">Confidence Level:</div>
+                  <div className="text-primary font-semibold">
+                    {Math.round(result.confidence * 100)}%
+                  </div>
+                </div>
+                <div className="mt-2 bg-gray-200 rounded-full h-2">
                   <div
-                    className="bg-primary rounded-full h-2"
+                    className="bg-primary rounded-full h-2 transition-all duration-500"
                     style={{ width: `${result.confidence * 100}%` }}
                   />
                 </div>
-                <div>{Math.round(result.confidence * 100)}%</div>
               </div>
             </motion.div>
           )}

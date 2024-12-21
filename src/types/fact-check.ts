@@ -1,5 +1,5 @@
 export interface FactCheckResult {
-  veracity: 'true' | 'false' | 'uncertain';
+  veracity: string;
   explanation: string;
   sources: string[];
   confidence: number;
